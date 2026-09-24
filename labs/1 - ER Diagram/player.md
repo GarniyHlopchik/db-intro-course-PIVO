@@ -29,7 +29,6 @@
   * `id` — `int generated always as identity` (Primary Key).
   * `name` — `varchar[100] NOT NULL` — ігрове ім'я персонажа.
   * `user_id` — `int NOT NULL` — Foreign Key до таблиці `User`.
-  * `map_id` — `int NOT NULL` — Foreign Key до мапи/локації.
   * `worldentity_id` — `int NOT NULL` — Foreign Key до сутності `WorldEntity` (визначає координати у світі та базові параметри сутності).
   * `stats_id` — `int NOT NULL` — Foreign Key до сутності `Stats`.
 
