@@ -2,124 +2,36 @@
 
 Описує сутності, пов'язані з користувачами, персонажами, їхніми характеристиками, закляттями та інвентарем.
 
----
-
 ## User
 
-Зберігає облікові дані гравців платформи.
-
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `username` — `varchar[100] NOT NULL` — унікальне ім'я користувача для входу та ідентифікації.
-  * `email` — `varchar[255] NOT NULL` — адреса електронної пошти.
-  * `password` — `varbinary[128] NOT NULL` — хеш пароля користувача.
-  * `ban_until` — `timestamp NULL default NULL` — часова мітка закінчення терміну блокування (якщо користувача заблоковано).
-  * `ban_reason` — `varchar[420] NULL` — причина накладання блокування.
-
-* **Зв'язки:**
-  * Має зв'язок один до багатьох із сутністю `Character` (один акаунт може мати нуль або кілька створених персонажів, але кожен персонаж належить строго одному користувачу).
-
----
+Зберігає облікові дані гравців платформи. Головним ключем цієї сутності є id - int generated always as identity. Окрім того, має атрибути username - varchar[100] NOT NULL для унікального імені користувача, email - varchar[255] NOT NULL, та password - varbinary[128] NOT NULL для хешу пароля. Також визначає стан блокування через ban_until - timestamp NULL default NULL та ban_reason - varchar[420] NULL. Має зв'язок один до нуля або багатьох із сутністю Character.
 
 ## Character
 
-Центральна сутність ігрового персонажа, що об'єднує ігрові підсистеми, білд, характеристики та фізичну присутність у світі.
+Центральна сутність ігрового персонажа, що об'єднує ігрові підсистеми, білд, характеристики та фізичну присутність у світі. Зберігає ігрове ім'я персонажа - name - varchar[100] NOT NULL, а також головний ключ id - int generated always as identity.
 
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `name` — `varchar[100] NOT NULL` — ігрове ім'я персонажа.
-  * `user_id` — `int NOT NULL` — Foreign Key до таблиці `User`.
-  * `worldentity_id` — `int NOT NULL` — Foreign Key до сутності `WorldEntity` (визначає координати у світі та базові параметри сутності).
-  * `stats_id` — `int NOT NULL` — Foreign Key до сутності `Stats`.
-
-* **Зв'язки:**
-  * **User:** багато до одного (нуль або багато персонажів належать одному `User`).
-  * **WorldEntity:** один до одного (персонаж є конкретним втіленням сутності світу).
-  * **Stats:** один до одного (персонаж володіє власним набором базових характеристик).
-  * **CharacterBuild:** один до одного (закріплює расу, стать, клас та зовнішність).
-  * **Attributes:** один до одного (зберігає динамічні ресурси: HP, ману, досвід).
-  * **Inventory:** один до одного (персональний інвентар та золото персонажа).
-  * **CharacterSpell:** один до багатьох (персонаж може вивчити нуль або декілька заклять).
-
----
+user_id є foreign key до таблиці User, кардинальність - багато до одного (нуль або багато персонажів належать одному User). Також має worldentity_id - int NOT NULL, foreign key на сутність WorldEntity (визначає координати у світі), та stats_id - int NOT NULL, foreign key на сутність Stats. Кожен з цих двох зв'язків має тип один до одного. Окрім того, персонаж має суворі зв'язки один до одного з сутностями CharacterBuild (білд), Attributes (динамічні ресурси) та Inventory (інвентар і золото). Відповідно, має зв'язок один до багатьох із CharacterSpell — персонаж може вивчити нуль або декілька заклять.
 
 ## CharacterBuild
 
-Зберігає візуальні та рольові характеристики персонажа, задані під час створення або кастомізації.
-
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `character_id` — `int NOT NULL UNIQUE` — Foreign Key до `Character`. Зв'язок строго один до одного.
-  * `race` — `Race NOT NULL` — раса персонажа (enum: `Human`, `Orc`, `Elf`, `Dwarf`, `Khajiit`).
-  * `skin_color_hex` — `char[7] NOT NULL` — шістнадцятковий код кольору шкіри (наприклад, `#FFFFFF`).
-  * `sex` — `SEX NOT NULL` — стать персонажа (enum: `Male`, `Female`, `Croissant`, `Non-binary`).
-  * `class` — `CLASS NOT NULL` — ігровий клас персонажа (enum: `Cleric`, `Fighter`, `Rogue`, `Wizard`).
-
----
+Зберігає візуальні та рольові характеристики персонажа, задані під час створення або кастомізації. Головним ключем є id - int generated always as identity, а також має foreign key character_id - int NOT NULL UNIQUE до сутності Character (зв'язок строго один до одного). Визначає атрибути race - Race NOT NULL з доступними значеннями enum: Human, Orc, Elf, Dwarf, Khajiit, та skin_color_hex - char[7] NOT NULL для шістнадцяткового коду кольору шкіри. Також має sex - SEX NOT NULL (enum: Male, Female, Croissant, Non-binary) та class - CLASS NOT NULL для визначення ігрового класу (enum: Cleric, Fighter, Rogue, Wizard).
 
 ## Stats
 
-Таблиця атрибутів базової бойової сили та фізичних/ментальних параметрів персонажа (або сутностей світу).
-
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `strength` — `int NOT NULL` — показник сили.
-  * `dexterity` — `int NOT NULL` — показник спритності/влучності.
-  * `intelligence` — `int NOT NULL` — показник інтелекту.
-  * `defense` — `int NOT NULL` — показник захисту/броні.
-  * `agility` — `int NOT NULL` — показник рухливості/швидкості реакції.
-
----
+Таблиця атрибутів базової бойової сили та фізичних або ментальних параметрів персонажа чи сутностей світу. Має головний ключ id - int generated always as identity. Зберігає показники у форматі int NOT NULL: strength (сила), dexterity (спритність/влучність), intelligence (інтелект), defense (захист/броня), agility (рухливість/швидкість реакції).
 
 ## Attributes
 
-Зберігає динамічні ресурсні параметри персонажа, які змінюються в процесі гри.
-
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `character_id` — `int NOT NULL UNIQUE` — Foreign Key до `Character` (тип зв'язку один до одного).
-  * `experience` — `int NOT NULL default 0` — поточна кількість накопиченого досвіду.
-  * `max_hp` — `int NOT NULL` — максимальний запас здоров'я.
-  * `current_hp` — `int NOT NULL` — поточний рівень здоров'я.
-  * `max_mana` — `int NOT NULL` — максимальний запас мани.
-  * `current_mana` — `int NOT NULL` — поточний рівень мани.
-
----
+Зберігає динамічні ресурсні параметри персонажа, які змінюються в процесі гри. id є int generated always as identity, а character_id - int NOT NULL UNIQUE, що є foreign key до Character з кардинальністю один до одного. Також має атрибути experience - int NOT NULL default 0, max_hp - int NOT NULL, current_hp - int NOT NULL, max_mana - int NOT NULL та current_mana - int NOT NULL.
 
 ## Inventory
 
-Описує персональне сховище предметів та фінанси конкретного персонажа.
-
-* **Атрибути:**
-  * `id` — `int generated always as identity` (Primary Key).
-  * `character_id` — `int NOT NULL UNIQUE` — Foreign Key до `Character` (тип зв'язку один до одного).
-  * `gold` — `int NOT NULL default 0` — кількість грошей/золота у персонажа.
-  * `capacity` — `int NOT NULL DEFAULT 20` — місткість інвентарю (максимальна кількість слотів/вага).
-
----
+Описує персональне сховище предметів та фінанси конкретного персонажа. Відповідно є foreign key character_id int NOT NULL UNIQUE на сутність Character (один до одного) та головний ключ id - int generated always as identity. Окрім того, визначає gold - int NOT NULL default 0 для кількості золота та capacity - int NOT NULL DEFAULT 20 для місткості інвентарю.
 
 ## Spell
 
-Каталог усіх доступних у грі заклять та магічних здібностей.
-
-* **Атрибути:**
-  * `id` — `varchar[128] NOT NULL` (Primary Key) — текстовий ідентифікатор закляття (наприклад, `fireball`, `heal`).
-  * `name` — `varchar[128] NOT NULL` — назва закляття для відображення в інтерфейсі клієнта.
-  * `description` — `varchar[512] NOT NULL` — повний опис дії та ефектів закляття.
-  * `mana_cost` — `int NOT NULL DEFAULT 0` — вартість застосування у мані.
-
----
+Каталог усіх доступних у грі заклять та магічних здібностей. Головним ключем цієї сутності є varchar[128] - таким чином кожне закляття ідентифікується унікальним рядком, наприклад fireball або heal. Окрім того є окремий атрибут name - varchar[128] NOT NULL для повноцінної назви закляття, що висвітлюється в інтерфейсі клієнта. Також є атрибут description - varchar[512] NOT NULL для повного опису дії, та mana_cost - int NOT NULL DEFAULT 0, що визначає вартість застосування.
 
 ## CharacterSpell
 
-Асоціативна сутність для реалізації зв'язку багато до багатьох між `Character` та `Spell` (відображає книгу вивчених заклять персонажа та їх прив'язку до панелі швидкого доступу).
-
-* **Атрибути:**
-  * `character_id` — `int NOT NULL` — Foreign Key до `Character`.
-  * `spell_id` — `varchar[128] NOT NULL` — Foreign Key до `Spell`.
-  * `slot_index` — `int NULL` — номер слота на панелі швидкого доступу/дії (якщо призначено).
-
-* **Кардинальність:**
-  * З боку `CharacterSpell` до кожної з пов'язаних сутностей — строго один.
-  * Персонаж може мати нуль або багато вивчених заклять (`Character` до `CharacterSpell` — нуль або багато).
-  * Одне й те саме закляття може бути вивчене багатьма персонажами (`Spell` до `CharacterSpell` — нуль або багато).
+Асоціативна сутність для реалізації зв'язку багато до багатьох між Character та Spell. Відображає книгу вивчених заклять персонажа та їх прив'язку до панелі швидкого доступу. Має два атрибути, які є foreign key: character_id int NOT NULL та spell_id varchar[128] NOT NULL, а також slot_index - int NULL для номеру слота на панелі дії. Кардинальність з боку CharacterSpell до кожної з пов'язаних сутностей - строго один. При цьому одне й те саме закляття може бути вивчене багатьма персонажами (нуль або багато), а персонаж може мати нуль або багато вивчених заклять.
