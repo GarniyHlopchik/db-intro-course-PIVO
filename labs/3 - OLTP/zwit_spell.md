@@ -39,7 +39,7 @@ delete from spell where (name = 'Ice Spike'); -- fails because some character ha
 select * from spell;
 ```
 
-![delete_fails](proof\spell\delete_fails.png)
+![delete_fails](proof/spell/delete_fails.png)
 
 ```sql
 delete from character_spell 
@@ -50,4 +50,4 @@ delete from spell where (name = 'Ice Spike'); -- works fine now
 select * from spell;
 ```
 
-![delete_succ](proof\spell\delete_succ.png)
+![delete_succ](proof/spell/delete_succ.png)
